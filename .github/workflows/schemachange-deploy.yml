@@ -3,7 +3,7 @@ name: Schema Change Deployment
 on:
   push:
     branches:
-      - main
+      - prod
       - develop
       - uat
     paths:
@@ -11,7 +11,7 @@ on:
       - '.github/workflows/schemachange-deploy.yml'
   pull_request:
     branches:
-      - main
+      - prod
       - develop
       - uat
     paths:
@@ -47,7 +47,7 @@ jobs:
           elif [ "${{ github.ref }}" == "refs/heads/uat" ]; then
             echo "environment=uat" >> $GITHUB_OUTPUT
             echo "should-deploy=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" == "refs/heads/main" ] || [ "${{ github.ref }}" == "refs/heads/master" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/prod" ]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
             echo "should-deploy=true" >> $GITHUB_OUTPUT
           else
