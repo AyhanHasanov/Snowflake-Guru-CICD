@@ -107,7 +107,7 @@ jobs:
               print(f'Expected format: V<version>__<description>.sql (e.g., V1.0.0__initial_setup.sql)')
               sys.exit(1)
           
-          print(f'✓ All {len(files)} migration files have valid names')
+          print(f'All {len(files)} migration files have valid names')
           "
 
   deploy-to-snowflake:
@@ -147,8 +147,7 @@ jobs:
             -w "$SNOWFLAKE_WAREHOUSE" \
             -d "$SNOWFLAKE_DATABASE" \
             -c "$SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY" \
-            --create-change-history-table \
-            --dry-run=false
+            --create-change-history-table 
       
       - name: Deploy to Snowflake (UAT)
         env:
@@ -169,8 +168,7 @@ jobs:
             -w "$SNOWFLAKE_WAREHOUSE" \
             -d "$SNOWFLAKE_DATABASE" \
             -c "$SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY" \
-            --create-change-history-table \
-            --dry-run=false
+            --create-change-history-table 
       
       - name: Deploy to Snowflake (PROD)
         env:
@@ -191,10 +189,9 @@ jobs:
             -w "$SNOWFLAKE_WAREHOUSE" \
             -d "$SNOWFLAKE_DATABASE" \
             -c "$SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY" \
-            --create-change-history-table \
-            --dry-run=false
+            --create-change-history-table 
 
       - name: Deployment Summary
         if: success()
         run: |
-          echo "✓ Successfully deployed migrations to ${{ needs.determine-environment.outputs.environment }} environment"
+          echo "Successfully deployed migrations to ${{ needs.determine-environment.outputs.environment }} environment"
