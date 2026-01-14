@@ -1,0 +1,200 @@
+name: Schema Change Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - uat
+    paths:
+      - 'migrations/**'
+      - '.github/workflows/schemachange-deploy.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+      - uat
+    paths:
+      - 'migrations/**'
+      - '.github/workflows/schemachange-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - uat
+          - prod
+
+jobs:
+  determine-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      should-deploy: ${{ steps.set-env.outputs.should-deploy }}
+    steps:
+      - name: Set environment based on branch
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/develop" ] || [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/uat" ]; then
+            echo "environment=uat" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/main" ] || [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Display environment
+        run: |
+          echo "Deploying to: ${{ steps.set-env.outputs.environment }}"
+          echo "Should deploy: ${{ steps.set-env.outputs.should-deploy }}"
+
+  validate-migrations:
+    runs-on: ubuntu-latest
+    needs: determine-environment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Validate migration files
+        run: |
+          echo "Validating migration file naming conventions..."
+          python -c "
+          import os
+          import re
+          import sys
+          
+          migrations_dir = 'migrations'
+          pattern = r'^V\d+\.\d+\.\d+__.+\.sql$'
+          
+          if not os.path.exists(migrations_dir):
+              print(f'ERROR: {migrations_dir} directory does not exist')
+              sys.exit(1)
+          
+          files = [f for f in os.listdir(migrations_dir) if f.endswith('.sql')]
+          if not files:
+              print('WARNING: No migration files found')
+              sys.exit(0)
+          
+          invalid_files = []
+          for file in files:
+              if not re.match(pattern, file):
+                  invalid_files.append(file)
+          
+          if invalid_files:
+              print('ERROR: Invalid migration file names:')
+              for file in invalid_files:
+                  print(f'  - {file}')
+              print(f'Expected format: V<version>__<description>.sql (e.g., V1.0.0__initial_setup.sql)')
+              sys.exit(1)
+          
+          print(f'✓ All {len(files)} migration files have valid names')
+          "
+
+  deploy-to-snowflake:
+    runs-on: ubuntu-latest
+    needs: [determine-environment, validate-migrations]
+    if: needs.determine-environment.outputs.should-deploy == 'true'
+    environment: ${{ needs.determine-environment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Deploy to Snowflake (DEV)
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_DEV }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER_DEV }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD_DEV }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_DEV }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_DEV }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
+        if: needs.determine-environment.outputs.environment == 'dev'
+        run: |
+          echo "Deploying to dev environment..."
+          schemachange \
+            -f migrations \
+            -a "$SNOWFLAKE_ACCOUNT" \
+            -u "$SNOWFLAKE_USER" \
+            -r "$SNOWFLAKE_ROLE" \
+            -w "$SNOWFLAKE_WAREHOUSE" \
+            -d "$SNOWFLAKE_DATABASE" \
+            -c "$SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY" \
+            --create-change-history-table \
+            --dry-run=false
+      
+      - name: Deploy to Snowflake (UAT)
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_UAT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER_UAT }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD_UAT }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_UAT }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_UAT }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_UAT }}
+        if: needs.determine-environment.outputs.environment == 'uat'
+        run: |
+          echo "Deploying to uat environment..."
+          schemachange \
+            -f migrations \
+            -a "$SNOWFLAKE_ACCOUNT" \
+            -u "$SNOWFLAKE_USER" \
+            -r "$SNOWFLAKE_ROLE" \
+            -w "$SNOWFLAKE_WAREHOUSE" \
+            -d "$SNOWFLAKE_DATABASE" \
+            -c "$SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY" \
+            --create-change-history-table \
+            --dry-run=false
+      
+      - name: Deploy to Snowflake (PROD)
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_PROD }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER_PROD }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD_PROD }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_PROD }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_PROD }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_PROD }}
+        if: needs.determine-environment.outputs.environment == 'prod'
+        run: |
+          echo "Deploying to prod environment..."
+          schemachange \
+            -f migrations \
+            -a "$SNOWFLAKE_ACCOUNT" \
+            -u "$SNOWFLAKE_USER" \
+            -r "$SNOWFLAKE_ROLE" \
+            -w "$SNOWFLAKE_WAREHOUSE" \
+            -d "$SNOWFLAKE_DATABASE" \
+            -c "$SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY" \
+            --create-change-history-table \
+            --dry-run=false
+
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo "✓ Successfully deployed migrations to ${{ needs.determine-environment.outputs.environment }} environment"
