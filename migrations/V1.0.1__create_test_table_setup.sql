@@ -1,0 +1,5 @@
+CREATE OR REPLACE TABLE PUBLIC.TEST_TABLE(
+    id INT, 
+    subject VARCHAR(100),
+    date DATE
+)
