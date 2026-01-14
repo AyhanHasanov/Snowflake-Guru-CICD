@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - prod
-      - develop
+      - dev
       - uat
     paths:
       - 'migrations/**'
@@ -12,7 +12,7 @@ on:
   pull_request:
     branches:
       - prod
-      - develop
+      - dev
       - uat
     paths:
       - 'migrations/**'
@@ -41,7 +41,7 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
             echo "should-deploy=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" == "refs/heads/develop" ] || [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
             echo "environment=dev" >> $GITHUB_OUTPUT
             echo "should-deploy=true" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" == "refs/heads/uat" ]; then
