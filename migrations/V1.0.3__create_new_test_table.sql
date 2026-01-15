@@ -1,0 +1,4 @@
+CREATE OR REPLACE TABLE PUBLIC.something(
+    id INT, 
+    name VARCHAR(255) NOT NULL
+)
