@@ -195,3 +195,43 @@ jobs:
         if: success()
         run: |
           echo "Successfully deployed migrations to ${{ needs.determine-environment.outputs.environment }} environment"
+      
+      - name: Check if XML files changed
+        id: xmlcheck
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "^db/assets/xml/"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload XML files to Snowflake stages
+        if: steps.xmlcheck.outputs.changed == 'true'
+        env:
+          SNOW_ACCOUNT: ${{ secrets.SNOW_ACCOUNT }}
+          SNOW_USER: ${{ secrets.SNOW_USER }}
+          SNOW_PWD: ${{ secrets.SNOW_PWD }}
+          SNOW_ROLE: ${{ secrets.SNOW_ROLE }}
+          SNOW_WAREHOUSE: ${{ secrets.SNOW_WAREHOUSE }}
+          SNOW_DATABASE: ${{ secrets.SNOW_DATABASE }}
+          SNOW_SCHEMA: ${{ secrets.SNOW_SCHEMA }}
+        run: |
+          echo "Uploading Stage1 XML files..."
+          snowsql \
+            -a "$SNOWFLAKE_ACCOUNT" \
+            -u "$SNOWFLAKE_USER" \
+            -p "$SNOWFLAKE_ROLE" \
+            -r "$SNOWFLAKE_WAREHOUSE" \
+            -w "$SNOWFLAKE_DATABASE" \
+            -d "$SNOWFLAKE_DATABASE.SCHEMACHANGE.CHANGE_HISTORY" \
+            -q "PUT file://$GITHUB_WORKSPACE/db/assets/xml/stage1/*.xml @my_schema.stage1 AUTO_COMPRESS=FALSE;"
+
+          echo "Uploading Stage2 XML files..."
+          snowsql \
+            -a "$SNOWFLAKE_ACCOUNT" \
+            -u "$SNOWFLAKE_USER" \
+            -p "$SNOWFLAKE_PASSWORD" \
+            -r "$SNOWFLAKE_ROLE" \
+            -w "$SNOWFLAKE_WAREHOUSE" \
+            -d "$SNOWFLAKE_DATABASE" \
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
