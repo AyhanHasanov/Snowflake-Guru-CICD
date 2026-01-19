@@ -198,24 +198,17 @@ jobs:
         run: |
           echo "Successfully deployed migrations to ${{ needs.determine-environment.outputs.environment }} environment"
       
-      - name: Check if XML files changed
+      - name: Check if XML files exist
         id: xmlcheck
         run: |
-          # Check if previous commit exists and is valid
-          if [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            # Try git diff, but handle errors gracefully
-            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null | grep -q "^assets/xml/"; then
-              echo "changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "changed=false" >> $GITHUB_OUTPUT
-            fi
+          # Check if XML files exist in the repository
+          if [ -d "assets/xml" ] && [ "$(find assets/xml -name '*.xml' 2>/dev/null | wc -l)" -gt 0 ]; then
+            echo "XML files found in assets/xml directory:"
+            find assets/xml -name '*.xml' | head -10
+            echo "changed=true" >> $GITHUB_OUTPUT
           else
-            # No previous commit or first push - check if files exist in current commit
-            if [ -d "assets/xml" ] && [ "$(find assets/xml -name '*.xml' 2>/dev/null | wc -l)" -gt 0 ]; then
-              echo "changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "changed=false" >> $GITHUB_OUTPUT
-            fi
+            echo "No XML files found in assets/xml directory"
+            echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Install SnowSQL
