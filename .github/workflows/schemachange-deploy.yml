@@ -217,23 +217,20 @@ jobs:
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y unzip
-          # libaio package name differs by Ubuntu version (24.04 uses libaio1t64)
+          sudo apt-get install -y openssl libssl-dev
           sudo apt-get install -y libaio1t64 || sudo apt-get install -y libaio1 || sudo apt-get install -y libaio-dev
           BOOTSTRAP="1.2"
           VERSION="1.2.23"
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
-
           echo "Downloading SnowSQL from $URL"
           curl -fSL "$URL" -o snowsql-installer.bash
           chmod +x snowsql-installer.bash
-
           mkdir -p "$HOME/bin"
           SNOWSQL_DEST="$HOME/bin" SNOWSQL_LOGIN_SHELL="$HOME/.profile" bash snowsql-installer.bash -b
-
           echo "$HOME/bin" >> $GITHUB_PATH
-
           "$HOME/bin/snowsql" --version
 
+      
       - name: Upload XML files to Snowflake stages (DEV)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'dev'
         env:
