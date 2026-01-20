@@ -214,27 +214,19 @@ jobs:
       - name: Install SnowSQL
         if: steps.xmlcheck.outputs.changed == 'true'
         run: |
-          VERSION="1.2.27"
           BOOTSTRAP="1.2"
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
+
           echo "Downloading SnowSQL from $URL"
           curl -fSL "$URL" -o snowsql-installer.bash
           chmod +x snowsql-installer.bash
+
           mkdir -p "$HOME/bin"
-          # Install to ~/bin directory using -b flag for batch mode
-          bash snowsql-installer.bash -b
-          # Add to PATH for subsequent steps
+          bash snowsql-installer.bash -b -p "$HOME/bin"
+
           echo "$HOME/bin" >> $GITHUB_PATH
-          # Verify installation
-          if [ -f "$HOME/bin/snowsql" ]; then
-            echo "SnowSQL installed successfully"
-            $HOME/bin/snowsql --version
-          else
-            echo "ERROR: SnowSQL binary not found. Checking installation directory..."
-            ls -la "$HOME/bin/" || echo "bin directory listing failed"
-            find "$HOME" -name "snowsql" -type f 2>/dev/null || echo "snowsql not found in home directory"
-            exit 1
-          fi
+
+          snowsql --version
 
       - name: Upload XML files to Snowflake stages (DEV)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'dev'
