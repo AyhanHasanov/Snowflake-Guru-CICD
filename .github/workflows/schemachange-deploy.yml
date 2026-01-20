@@ -242,11 +242,11 @@ jobs:
           SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
         run: |
           echo "Uploading Anime StackExchange XML files..."
-          snowsql \
+          snowsql -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql \
+          snowsql -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
       - name: Upload XML files to Snowflake stages (UAT)
