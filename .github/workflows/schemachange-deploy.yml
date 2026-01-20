@@ -237,89 +237,53 @@ jobs:
       - name: Upload XML files to Snowflake stages (DEV)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'dev'
         env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_DEV }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER_DEV }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD_DEV }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_DEV }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_DEV }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
+          SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_DEV }}
+          SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER_DEV }}
+          SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD_DEV }}
+          SNOWSQL_ROLE: ${{ secrets.SNOWFLAKE_ROLE_DEV }}
+          SNOWSQL_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_DEV }}
+          SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
         run: |
           echo "Uploading Anime StackExchange XML files..."
           snowsql \
-            -a "$SNOWFLAKE_ACCOUNT" \
-            -u "$SNOWFLAKE_USER" \
-            -p "$SNOWFLAKE_PASSWORD" \
-            -r "$SNOWFLAKE_ROLE" \
-            -w "$SNOWFLAKE_WAREHOUSE" \
-            -d "$SNOWFLAKE_DATABASE" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
           snowsql \
-            -a "$SNOWFLAKE_ACCOUNT" \
-            -u "$SNOWFLAKE_USER" \
-            -p "$SNOWFLAKE_PASSWORD" \
-            -r "$SNOWFLAKE_ROLE" \
-            -w "$SNOWFLAKE_WAREHOUSE" \
-            -d "$SNOWFLAKE_DATABASE" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
       - name: Upload XML files to Snowflake stages (UAT)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'uat'
         env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_UAT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER_UAT }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD_UAT }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_UAT }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_UAT }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_UAT }}
+          SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_UAT }}
+          SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER_UAT }}
+          SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD_UAT }}
+          SNOWSQL_ROLE: ${{ secrets.SNOWFLAKE_ROLE_UAT }}
+          SNOWSQL_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_UAT }}
+          SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_UAT }}
         run: |
           echo "Uploading Anime StackExchange XML files..."
           snowsql \
-            -a "$SNOWFLAKE_ACCOUNT" \
-            -u "$SNOWFLAKE_USER" \
-            -p "$SNOWFLAKE_PASSWORD" \
-            -r "$SNOWFLAKE_ROLE" \
-            -w "$SNOWFLAKE_WAREHOUSE" \
-            -d "$SNOWFLAKE_DATABASE" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
           snowsql \
-            -a "$SNOWFLAKE_ACCOUNT" \
-            -u "$SNOWFLAKE_USER" \
-            -p "$SNOWFLAKE_PASSWORD" \
-            -r "$SNOWFLAKE_ROLE" \
-            -w "$SNOWFLAKE_WAREHOUSE" \
-            -d "$SNOWFLAKE_DATABASE" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
       - name: Upload XML files to Snowflake stages (PROD)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'prod'
         env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_PROD }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER_PROD }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD_PROD }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE_PROD }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_PROD }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_PROD }}
+          SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT_PROD }}
+          SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER_PROD }}
+          SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD_PROD }}
+          SNOWSQL_ROLE: ${{ secrets.SNOWFLAKE_ROLE_PROD }}
+          SNOWSQL_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_PROD }}
+          SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_PROD }}
         run: |
           echo "Uploading Anime StackExchange XML files..."
           snowsql \
-            -a "$SNOWFLAKE_ACCOUNT" \
-            -u "$SNOWFLAKE_USER" \
-            -p "$SNOWFLAKE_PASSWORD" \
-            -r "$SNOWFLAKE_ROLE" \
-            -w "$SNOWFLAKE_WAREHOUSE" \
-            -d "$SNOWFLAKE_DATABASE" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
           snowsql \
-            -a "$SNOWFLAKE_ACCOUNT" \
-            -u "$SNOWFLAKE_USER" \
-            -p "$SNOWFLAKE_PASSWORD" \
-            -r "$SNOWFLAKE_ROLE" \
-            -w "$SNOWFLAKE_WAREHOUSE" \
-            -d "$SNOWFLAKE_DATABASE" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
