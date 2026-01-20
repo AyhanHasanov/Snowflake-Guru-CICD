@@ -245,13 +245,30 @@ jobs:
           SNOWSQL_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_DEV }}
           SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
         run: |
+          set -euo pipefail
+          echo "SnowSQL upload diagnostics (DEV)"
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "PWD: $(pwd)"
+          echo "Account: ${SNOWSQL_ACCOUNT}"
+          echo "User: ${SNOWSQL_USER}"
+          echo "Role: ${SNOWSQL_ROLE}"
+          echo "Warehouse: ${SNOWSQL_WAREHOUSE}"
+          echo "Database: ${SNOWSQL_DATABASE}"
+          echo "Files in assets/xml/anime_stack_exchange:"
+          ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
+          echo "Files in assets/xml/beer_stack_exchange:"
+          ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
+          export SNOWSQL_LOG_PATH="$RUNNER_TEMP/snowsql-logs/dev"
+          mkdir -p "$SNOWSQL_LOG_PATH"
           echo "Uploading Anime StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          echo "SnowSQL logs (DEV):"
+          ls -la "$SNOWSQL_LOG_PATH" || true
 
       - name: Upload XML files to Snowflake stages (UAT)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'uat'
@@ -263,13 +280,30 @@ jobs:
           SNOWSQL_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_UAT }}
           SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_UAT }}
         run: |
+          set -euo pipefail
+          echo "SnowSQL upload diagnostics (UAT)"
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "PWD: $(pwd)"
+          echo "Account: ${SNOWSQL_ACCOUNT}"
+          echo "User: ${SNOWSQL_USER}"
+          echo "Role: ${SNOWSQL_ROLE}"
+          echo "Warehouse: ${SNOWSQL_WAREHOUSE}"
+          echo "Database: ${SNOWSQL_DATABASE}"
+          echo "Files in assets/xml/anime_stack_exchange:"
+          ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
+          echo "Files in assets/xml/beer_stack_exchange:"
+          ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
+          export SNOWSQL_LOG_PATH="$RUNNER_TEMP/snowsql-logs/uat"
+          mkdir -p "$SNOWSQL_LOG_PATH"
           echo "Uploading Anime StackExchange XML files..."
-          snowsql \
+          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql \
+          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          echo "SnowSQL logs (UAT):"
+          ls -la "$SNOWSQL_LOG_PATH" || true
 
       - name: Upload XML files to Snowflake stages (PROD)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'prod'
@@ -281,10 +315,27 @@ jobs:
           SNOWSQL_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE_PROD }}
           SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_PROD }}
         run: |
+          set -euo pipefail
+          echo "SnowSQL upload diagnostics (PROD)"
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "PWD: $(pwd)"
+          echo "Account: ${SNOWSQL_ACCOUNT}"
+          echo "User: ${SNOWSQL_USER}"
+          echo "Role: ${SNOWSQL_ROLE}"
+          echo "Warehouse: ${SNOWSQL_WAREHOUSE}"
+          echo "Database: ${SNOWSQL_DATABASE}"
+          echo "Files in assets/xml/anime_stack_exchange:"
+          ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
+          echo "Files in assets/xml/beer_stack_exchange:"
+          ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
+          export SNOWSQL_LOG_PATH="$RUNNER_TEMP/snowsql-logs/prod"
+          mkdir -p "$SNOWSQL_LOG_PATH"
           echo "Uploading Anime StackExchange XML files..."
-          snowsql \
+          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql \
+          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          echo "SnowSQL logs (PROD):"
+          ls -la "$SNOWSQL_LOG_PATH" || true
