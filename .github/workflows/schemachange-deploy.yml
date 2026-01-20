@@ -222,16 +222,25 @@ jobs:
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
 
           echo "Downloading SnowSQL from $URL"
-          curl -fSL "$URL" -o snowsql-installer.bash
+          curl -fSL "$URL" -o snowsql-installer.bash || { echo "Failed to download SnowSQL installer"; exit 1; }
           chmod +x snowsql-installer.bash
 
           mkdir -p "$HOME/bin"
-          bash snowsql-installer.bash -b -p "$HOME/bin"
+          bash snowsql-installer.bash -b -p "$HOME/bin" || { echo "SnowSQL installation failed"; exit 1; }
 
           echo "$HOME/bin" >> $GITHUB_PATH
+          export PATH="$HOME/bin:$PATH"
 
+          if ! command -v snowsql &> /dev/null; then
+            echo "ERROR: snowsql command not found after installation"
+            echo "PATH: $PATH"
+            ls -la "$HOME/bin" || true
+            exit 1
+          fi
+
+          echo "SnowSQL installed successfully:"
           which snowsql
-          snowsql --version
+          snowsql --version || { echo "Failed to get SnowSQL version"; exit 1; }
 
       
       - name: Upload XML files to Snowflake stages (DEV)
@@ -245,6 +254,13 @@ jobs:
           SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_DEV }}
         run: |
           set -euo pipefail
+          export PATH="$HOME/bin:$PATH"
+          
+          if ! command -v snowsql &> /dev/null; then
+            echo "ERROR: snowsql command not found"
+            exit 1
+          fi
+          
           echo "SnowSQL upload diagnostics (DEV)"
           echo "Workspace: $GITHUB_WORKSPACE"
           echo "PWD: $(pwd)"
@@ -257,17 +273,28 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
+          
           echo "Uploading Anime StackExchange XML files..."
-          snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
-            2>&1 | tee "$RUNNER_TEMP/snowsql-dev-anime.log"
+            2>&1 | tee "$RUNNER_TEMP/snowsql-dev-anime.log"; then
+            echo "ERROR: Failed to upload Anime StackExchange XML files"
+            cat "$RUNNER_TEMP/snowsql-dev-anime.log" || true
+            exit 1
+          fi
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
-            2>&1 | tee "$RUNNER_TEMP/snowsql-dev-beer.log"
+            2>&1 | tee "$RUNNER_TEMP/snowsql-dev-beer.log"; then
+            echo "ERROR: Failed to upload Beer StackExchange XML files"
+            cat "$RUNNER_TEMP/snowsql-dev-beer.log" || true
+            exit 1
+          fi
+          
           echo "SnowSQL logs (DEV):"
           ls -la "$RUNNER_TEMP/snowsql-dev-"*.log || true
+          echo "Upload completed successfully"
 
       - name: Upload XML files to Snowflake stages (UAT)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'uat'
@@ -280,6 +307,13 @@ jobs:
           SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_UAT }}
         run: |
           set -euo pipefail
+          export PATH="$HOME/bin:$PATH"
+          
+          if ! command -v snowsql &> /dev/null; then
+            echo "ERROR: snowsql command not found"
+            exit 1
+          fi
+          
           echo "SnowSQL upload diagnostics (UAT)"
           echo "Workspace: $GITHUB_WORKSPACE"
           echo "PWD: $(pwd)"
@@ -292,17 +326,28 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
+          
           echo "Uploading Anime StackExchange XML files..."
-          snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
-            2>&1 | tee "$RUNNER_TEMP/snowsql-uat-anime.log"
+            2>&1 | tee "$RUNNER_TEMP/snowsql-uat-anime.log"; then
+            echo "ERROR: Failed to upload Anime StackExchange XML files"
+            cat "$RUNNER_TEMP/snowsql-uat-anime.log" || true
+            exit 1
+          fi
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
-            2>&1 | tee "$RUNNER_TEMP/snowsql-uat-beer.log"
+            2>&1 | tee "$RUNNER_TEMP/snowsql-uat-beer.log"; then
+            echo "ERROR: Failed to upload Beer StackExchange XML files"
+            cat "$RUNNER_TEMP/snowsql-uat-beer.log" || true
+            exit 1
+          fi
+          
           echo "SnowSQL logs (UAT):"
           ls -la "$RUNNER_TEMP/snowsql-uat-"*.log || true
+          echo "Upload completed successfully"
 
       - name: Upload XML files to Snowflake stages (PROD)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'prod'
@@ -315,6 +360,13 @@ jobs:
           SNOWSQL_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE_PROD }}
         run: |
           set -euo pipefail
+          export PATH="$HOME/bin:$PATH"
+          
+          if ! command -v snowsql &> /dev/null; then
+            echo "ERROR: snowsql command not found"
+            exit 1
+          fi
+          
           echo "SnowSQL upload diagnostics (PROD)"
           echo "Workspace: $GITHUB_WORKSPACE"
           echo "PWD: $(pwd)"
@@ -327,14 +379,25 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
+          
           echo "Uploading Anime StackExchange XML files..."
-          snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
-            2>&1 | tee "$RUNNER_TEMP/snowsql-prod-anime.log"
+            2>&1 | tee "$RUNNER_TEMP/snowsql-prod-anime.log"; then
+            echo "ERROR: Failed to upload Anime StackExchange XML files"
+            cat "$RUNNER_TEMP/snowsql-prod-anime.log" || true
+            exit 1
+          fi
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
-            2>&1 | tee "$RUNNER_TEMP/snowsql-prod-beer.log"
+            2>&1 | tee "$RUNNER_TEMP/snowsql-prod-beer.log"; then
+            echo "ERROR: Failed to upload Beer StackExchange XML files"
+            cat "$RUNNER_TEMP/snowsql-prod-beer.log" || true
+            exit 1
+          fi
+          
           echo "SnowSQL logs (PROD):"
           ls -la "$RUNNER_TEMP/snowsql-prod-"*.log || true
+          echo "Upload completed successfully"
