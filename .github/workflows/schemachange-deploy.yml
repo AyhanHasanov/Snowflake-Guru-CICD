@@ -275,7 +275,7 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
           
           echo "Uploading Anime StackExchange XML files..."
-          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-dev-anime.log"; then
             echo "ERROR: Failed to upload Anime StackExchange XML files"
@@ -284,7 +284,7 @@ jobs:
           fi
 
           echo "Uploading Beer StackExchange XML files..."
-          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-dev-beer.log"; then
             echo "ERROR: Failed to upload Beer StackExchange XML files"
@@ -328,7 +328,7 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
           
           echo "Uploading Anime StackExchange XML files..."
-          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-uat-anime.log"; then
             echo "ERROR: Failed to upload Anime StackExchange XML files"
@@ -337,7 +337,7 @@ jobs:
           fi
 
           echo "Uploading Beer StackExchange XML files..."
-          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-uat-beer.log"; then
             echo "ERROR: Failed to upload Beer StackExchange XML files"
@@ -381,7 +381,7 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
           
           echo "Uploading Anime StackExchange XML files..."
-          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-prod-anime.log"; then
             echo "ERROR: Failed to upload Anime StackExchange XML files"
@@ -390,7 +390,7 @@ jobs:
           fi
 
           echo "Uploading Beer StackExchange XML files..."
-          if ! snowsql --config-path /dev/null -o log_level=DEBUG \
+          if ! snowsql --config-path /dev/null \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-prod-beer.log"; then
             echo "ERROR: Failed to upload Beer StackExchange XML files"
