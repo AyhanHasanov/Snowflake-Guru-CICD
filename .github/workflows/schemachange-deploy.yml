@@ -210,6 +210,10 @@ jobs:
             echo "No XML files found in assets/xml directory"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
+      - name: Ensure OpenSSL 1.1 compatibility
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl1.1 || sudo apt-get install -y libssl-dev
 
       - name: Install SnowSQL
         if: steps.xmlcheck.outputs.changed == 'true'
