@@ -224,7 +224,7 @@ jobs:
           sudo apt-get install -y openssl libssl-dev
           sudo apt-get install -y libaio1t64 || sudo apt-get install -y libaio1 || sudo apt-get install -y libaio-dev
           BOOTSTRAP="1.2"
-          VERSION="1.2.23"
+          VERSION="1.2.27"
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
           echo "Downloading SnowSQL from $URL"
           curl -fSL "$URL" -o snowsql-installer.bash
