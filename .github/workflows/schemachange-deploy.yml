@@ -216,6 +216,7 @@ jobs:
         if: steps.xmlcheck.outputs.changed == 'true'
         run: |
           set -euo pipefail
+
           BOOTSTRAP="1.2"
           VERSION="1.2.27"
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
@@ -228,6 +229,8 @@ jobs:
           bash snowsql-installer.bash -b -p "$HOME/bin"
 
           echo "$HOME/bin" >> $GITHUB_PATH
+
+          which snowsql
           snowsql --version
 
       
@@ -255,12 +258,12 @@ jobs:
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
           echo "Uploading Anime StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-dev-anime.log"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-dev-beer.log"
           echo "SnowSQL logs (DEV):"
@@ -290,12 +293,12 @@ jobs:
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
           echo "Uploading Anime StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-uat-anime.log"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-uat-beer.log"
           echo "SnowSQL logs (UAT):"
@@ -325,12 +328,12 @@ jobs:
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
           echo "Uploading Anime StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-prod-anime.log"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql -o log_level=DEBUG \
+          snowsql --config-path /dev/null -o log_level=DEBUG \
             -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
             2>&1 | tee "$RUNNER_TEMP/snowsql-prod-beer.log"
           echo "SnowSQL logs (PROD):"
