@@ -258,17 +258,17 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
-          export SNOWSQL_LOG_PATH="$RUNNER_TEMP/snowsql-logs/dev"
-          mkdir -p "$SNOWSQL_LOG_PATH"
           echo "Uploading Anime StackExchange XML files..."
-          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          snowsql -o log_level=DEBUG \
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
+            2>&1 | tee "$RUNNER_TEMP/snowsql-dev-anime.log"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          snowsql -o log_level=DEBUG \
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
+            2>&1 | tee "$RUNNER_TEMP/snowsql-dev-beer.log"
           echo "SnowSQL logs (DEV):"
-          ls -la "$SNOWSQL_LOG_PATH" || true
+          ls -la "$RUNNER_TEMP/snowsql-dev-"*.log || true
 
       - name: Upload XML files to Snowflake stages (UAT)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'uat'
@@ -293,17 +293,17 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
-          export SNOWSQL_LOG_PATH="$RUNNER_TEMP/snowsql-logs/uat"
-          mkdir -p "$SNOWSQL_LOG_PATH"
           echo "Uploading Anime StackExchange XML files..."
-          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          snowsql -o log_level=DEBUG \
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
+            2>&1 | tee "$RUNNER_TEMP/snowsql-uat-anime.log"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          snowsql -o log_level=DEBUG \
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
+            2>&1 | tee "$RUNNER_TEMP/snowsql-uat-beer.log"
           echo "SnowSQL logs (UAT):"
-          ls -la "$SNOWSQL_LOG_PATH" || true
+          ls -la "$RUNNER_TEMP/snowsql-uat-"*.log || true
 
       - name: Upload XML files to Snowflake stages (PROD)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'prod'
@@ -328,14 +328,14 @@ jobs:
           ls -la "$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange" || true
           echo "Files in assets/xml/beer_stack_exchange:"
           ls -la "$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange" || true
-          export SNOWSQL_LOG_PATH="$RUNNER_TEMP/snowsql-logs/prod"
-          mkdir -p "$SNOWSQL_LOG_PATH"
           echo "Uploading Anime StackExchange XML files..."
-          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          snowsql -o log_level=DEBUG \
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
+            2>&1 | tee "$RUNNER_TEMP/snowsql-prod-anime.log"
 
           echo "Uploading Beer StackExchange XML files..."
-          snowsql -o log_level=DEBUG -o log_path="$SNOWSQL_LOG_PATH" \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+          snowsql -o log_level=DEBUG \
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;" \
+            2>&1 | tee "$RUNNER_TEMP/snowsql-prod-beer.log"
           echo "SnowSQL logs (PROD):"
-          ls -la "$SNOWSQL_LOG_PATH" || true
+          ls -la "$RUNNER_TEMP/snowsql-prod-"*.log || true
