@@ -244,11 +244,11 @@ jobs:
         run: |
           echo "Uploading Anime StackExchange XML files..."
           snowsql -o log_level=DEBUG \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @$SNOWSQL_DATABASE.ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
           snowsql -o log_level=DEBUG \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @$SNOWSQL_DATABASE.BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
       - name: Upload XML files to Snowflake stages (UAT)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'uat'
@@ -262,11 +262,11 @@ jobs:
         run: |
           echo "Uploading Anime StackExchange XML files..."
           snowsql \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @$SNOWSQL_DATABASE.ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
           snowsql \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @$SNOWSQL_DATABASE.BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
       - name: Upload XML files to Snowflake stages (PROD)
         if: steps.xmlcheck.outputs.changed == 'true' && needs.determine-environment.outputs.environment == 'prod'
@@ -280,8 +280,8 @@ jobs:
         run: |
           echo "Uploading Anime StackExchange XML files..."
           snowsql \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/anime_stack_exchange/*.xml @$SNOWSQL_DATABASE.ANIME_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
 
           echo "Uploading Beer StackExchange XML files..."
           snowsql \
-            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
+            -q "PUT file://$GITHUB_WORKSPACE/assets/xml/beer_stack_exchange/*.xml @$SNOWSQL_DATABASE.BEER_STACKEXCHANGE_SOURCE.RAW_STAGE AUTO_COMPRESS=FALSE;"
