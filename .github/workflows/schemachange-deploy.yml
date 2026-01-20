@@ -215,6 +215,7 @@ jobs:
         if: steps.xmlcheck.outputs.changed == 'true'
         run: |
           BOOTSTRAP="1.2"
+          VERSION="1.2.23"
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
 
           echo "Downloading SnowSQL from $URL"
