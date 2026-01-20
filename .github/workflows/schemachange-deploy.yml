@@ -30,7 +30,7 @@ on:
 
 jobs:
   determine-environment:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       environment: ${{ steps.set-env.outputs.environment }}
       should-deploy: ${{ steps.set-env.outputs.should-deploy }}
@@ -60,7 +60,7 @@ jobs:
           echo "Should deploy: ${{ steps.set-env.outputs.should-deploy }}"
 
   validate-migrations:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: determine-environment
     steps:
       - name: Checkout code
@@ -111,7 +111,7 @@ jobs:
           "
 
   deploy-to-snowflake:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [determine-environment, validate-migrations]
     if: needs.determine-environment.outputs.should-deploy == 'true'
     environment: ${{ needs.determine-environment.outputs.environment }}
@@ -210,29 +210,25 @@ jobs:
             echo "No XML files found in assets/xml directory"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
-      - name: Ensure OpenSSL 1.1 compatibility
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libssl1.1 || sudo apt-get install -y libssl-dev
+      
 
       - name: Install SnowSQL
         if: steps.xmlcheck.outputs.changed == 'true'
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y unzip
-          sudo apt-get install -y openssl libssl-dev
-          sudo apt-get install -y libaio1t64 || sudo apt-get install -y libaio1 || sudo apt-get install -y libaio-dev
           BOOTSTRAP="1.2"
           VERSION="1.2.27"
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
+
           echo "Downloading SnowSQL from $URL"
           curl -fSL "$URL" -o snowsql-installer.bash
           chmod +x snowsql-installer.bash
+
           mkdir -p "$HOME/bin"
-          SNOWSQL_DEST="$HOME/bin" SNOWSQL_LOGIN_SHELL="$HOME/.profile" bash snowsql-installer.bash -b
+          bash snowsql-installer.bash -b -p "$HOME/bin"
+
           echo "$HOME/bin" >> $GITHUB_PATH
-          "$HOME/bin/snowsql" --version
+          snowsql --version
 
       
       - name: Upload XML files to Snowflake stages (DEV)
