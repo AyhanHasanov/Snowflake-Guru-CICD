@@ -210,23 +210,20 @@ jobs:
             echo "No XML files found in assets/xml directory"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
-      - name: Ensure OpenSSL 1.1 compatibility
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libssl1.1 || sudo apt-get install -y libssl-dev
-
-      - name: Install SnowSQL
+      - name: Install SnowSQL (OpenSSL 3.0 compatible)
         if: steps.xmlcheck.outputs.changed == 'true'
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y unzip
-          sudo apt-get install -y openssl libssl-dev
+          # OpenSSL 3.0+ is already available on ubuntu-latest (Ubuntu 22.04+)
+          # No need to install legacy OpenSSL 1.1
           sudo apt-get install -y libaio1t64 || sudo apt-get install -y libaio1 || sudo apt-get install -y libaio-dev
-          BOOTSTRAP="1.2"
-          VERSION="1.2.23"
+          # SnowSQL 1.4.5+ supports OpenSSL 3.0+
+          BOOTSTRAP="1.4"
+          VERSION="1.4.5"
           URL="https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/$BOOTSTRAP/linux_x86_64/snowsql-$VERSION-linux_x86_64.bash"
-          echo "Downloading SnowSQL from $URL"
+          echo "Downloading SnowSQL $VERSION (OpenSSL 3.0 compatible) from $URL"
           curl -fSL "$URL" -o snowsql-installer.bash
           chmod +x snowsql-installer.bash
           mkdir -p "$HOME/bin"
