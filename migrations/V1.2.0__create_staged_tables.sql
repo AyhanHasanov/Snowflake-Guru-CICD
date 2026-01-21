@@ -1,8 +1,4 @@
--- ============================================
 -- Create Staged/Deduplicated Tables for Anime StackExchange
--- ============================================
-
--- Posts Staged Table
 CREATE OR REPLACE TABLE ANIME_STACKEXCHANGE_SOURCE.POSTS_STAGED (
     ID NUMBER PRIMARY KEY,
     POST_TYPE_ID NUMBER,
